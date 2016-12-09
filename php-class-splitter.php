@@ -18,23 +18,26 @@ while ($token = next($tokens)) {
                 && empty($name)) {
                 $name = $token[1];
             }
-        } while (!(is_string($token) && $token == '{') && $token = next($tokens));
+        } while (!(is_string($token) && $token === '{') && !(is_array($token) && $token[1] == '{') && $token = next($tokens));
     } elseif ($buffer) {
-        if (is_string($token)) {
-            $code .= $token;
-            if ($token == '{') {
-                $braces++;
-            } elseif ($token == '}') {
-                $braces--;
-                if ($braces == 0) {
-                    $buffer = false;
-                    $file = $dest . '/' . $name . '.php';
-                    $code = '<?php' . PHP_EOL . $code;
-                    file_put_contents($file, $code); 
-                }
+
+        if (is_array($token)) {
+            $token = $token[1];
+        }
+
+        $code .= $token;
+
+        if ($token == '{') {
+            $braces++;
+        } elseif ($token == '}') {
+            $braces--;
+            if ($braces == 0) {
+                $buffer = false;
+                $file = $dest . '/' . $name . '.php';
+                $code = '<?php' . PHP_EOL . $code;
+                file_put_contents($file, $code);
             }
-        } else {
-            $code .= $token[1];
         }
     }
 }
+
